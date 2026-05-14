@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --black: #0a0a0a;
+  --white: #ffffff;
+  --red: #E63329;
+  --yellow: #F5C518;
+  --blue: #1A4BFF;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--white);
+  color: var(--black);
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 700;
+}
