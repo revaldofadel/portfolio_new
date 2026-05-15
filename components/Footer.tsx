@@ -24,9 +24,6 @@ export default function Footer() {
           >
             LinkedIn
           </a>
-          <a href="/admin" className="hover:text-[#F5C518]">
-            Admin
-          </a>
         </div>
       </div>
     </footer>
