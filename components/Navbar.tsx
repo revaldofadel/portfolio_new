@@ -23,12 +23,6 @@ export default function Navbar() {
               {item}
             </a>
           ))}
-          <a
-            href="/admin"
-            className="bg-black text-white px-4 py-1 hover:bg-[#E63329] transition-colors duration-200"
-          >
-            Admin
-          </a>
         </div>
         <button
           className="md:hidden font-bold text-xl"

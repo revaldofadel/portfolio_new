@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { uploadToCloudinary } from '@/lib/cloudinary'
 
 type Project = {
   id: number
@@ -15,6 +16,9 @@ type Project = {
 export default function PortfolioManager() {
   const router = useRouter()
   const [projects, setProjects] = useState<Project[]>([])
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [preview, setPreview] = useState<string>('')
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState({ title: '', client: '', category: 'Logo & Brand', description: '' })
@@ -33,15 +37,43 @@ export default function PortfolioManager() {
     setLoading(false)
   }
 
-  const addProject = async (e: React.FormEvent) => {
+ const addProject = async (e: React.FormEvent) => {
     e.preventDefault()
-    const { data, error } = await supabase.from('projects').insert([form]).select()
+    setUploading(true)
+
+    let image_url = ''
+    if (imageFile) {
+      try {
+        image_url = await uploadToCloudinary(imageFile)
+      } catch (err) {
+        alert('Gagal upload gambar, coba lagi!')
+        setUploading(false)
+        return
+      }
+    }
+
+    const { data, error } = await supabase
+      .from('projects')
+      .insert([{ ...form, image_url }])
+      .select()
+
     if (!error && data) {
       setProjects([data[0], ...projects])
       setForm({ title: '', client: '', category: 'Logo & Brand', description: '' })
+      setImageFile(null)
+      setPreview('')
       setShowForm(false)
     }
+    setUploading(false)
   }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setImageFile(file)
+      setPreview(URL.createObjectURL(file)) // preview lokal
+    }
+  } 
 
   const deleteProject = async (id: number) => {
     await supabase.from('projects').delete().eq('id', id)
@@ -97,13 +129,33 @@ export default function PortfolioManager() {
               onChange={e => setForm({...form, description: e.target.value})}
               rows={3}
               className="w-full bg-transparent border-2 border-gray-600 px-4 py-2 text-white focus:outline-none focus:border-[#F5C518] resize-none" />
+            <div>
+              <label className="text-xs uppercase text-gray-400 mb-2 block"
+                style={{ fontFamily: 'Josefin Sans, sans-serif' }}>
+                Project Image
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="w-full bg-transparent border-2 border-gray-600 px-4 py-2 text-white focus:outline-none focus:border-[#F5C518] file:mr-4 file:bg-[#F5C518] file:text-black file:font-bold file:border-0 file:px-4 file:py-1 file:uppercase file:text-xs file:cursor-pointer"/>
+              {preview && (
+                <div className="mt-3 border-2 border-gray-600 overflow-hidden">
+                  <img src={preview} alt="Preview" className="w-full h-40 object-cover" />
+                </div>
+              )}
+            </div>
             <div className="flex gap-3">
-              <button type="submit"
-                className="bg-[#E63329] text-white font-bold uppercase text-sm px-6 py-2 hover:bg-red-700"
-                style={{ fontFamily: 'Josefin Sans, sans-serif' }}>Save</button>
-              <button type="button" onClick={() => setShowForm(false)}
-                className="border-2 border-gray-600 text-gray-400 font-bold uppercase text-sm px-6 py-2 hover:border-white hover:text-white"
-                style={{ fontFamily: 'Josefin Sans, sans-serif' }}>Cancel</button>
+              <button type="submit" disabled={uploading}
+                className="bg-[#E63329] text-white font-bold uppercase text-sm px-6 py-2 hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
+                style={{ fontFamily: 'Josefin Sans, sans-serif' }}>
+                {uploading ? (
+                  <>
+                    <span className="animate-spin">◈</span>
+                    Uploading...
+                  </>
+                ) : 'Save Project'}
+              </button>
             </div>
           </form>
         )}

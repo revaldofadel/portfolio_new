@@ -9,6 +9,7 @@ type Post = {
   excerpt: string
   status: string
   created_at: string
+  thumbnail_url: string
 }
 
 export default function Blog() {
@@ -77,7 +78,15 @@ export default function Blog() {
               <article key={post.id}
                 className="bg-white border-4 border-black group hover:-translate-y-1 transition-transform duration-300">
                 <div className="h-40 bg-black flex items-center justify-center relative overflow-hidden">
-                  <div className="w-12 h-12 border-4 border-[#F5C518] rotate-45 group-hover:rotate-0 transition-transform duration-500" />
+                  {post.thumbnail_url ? (
+                    <img
+                      src={post.thumbnail_url}
+                      alt={post.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 border-4 border-[#F5C518] rotate-45 group-hover:rotate-0 transition-transform duration-500" />
+                  )}
                 </div>
                 <div className="p-6">
                   <div className="flex gap-2 items-center mb-3">

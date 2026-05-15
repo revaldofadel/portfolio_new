@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { uploadToCloudinary } from '@/lib/cloudinary'
 
 type Post = {
   id: number
@@ -26,6 +27,8 @@ export default function BlogManager() {
     content: '',
     status: 'Draft' as 'Published' | 'Draft'
   })
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false) 
 
   useEffect(() => {
     if (!localStorage.getItem('admin_auth')) router.push('/admin')
@@ -43,15 +46,31 @@ export default function BlogManager() {
 
   const addPost = async (e: React.FormEvent) => {
     e.preventDefault()
+    setUploading(true)
+
+    let thumbnail_url = ''
+    if (imageFile) {
+      try {
+        thumbnail_url = await uploadToCloudinary(imageFile)
+      } catch {
+        alert('Gagal upload thumbnail!')
+        setUploading(false)
+        return
+      }
+    }
+
     const { data, error } = await supabase
       .from('blog_posts')
-      .insert([form])
+      .insert([{ ...form, thumbnail_url }])
       .select()
+
     if (!error && data) {
       setPosts([data[0], ...posts])
       setForm({ title: '', category: 'Design Theory', excerpt: '', content: '', status: 'Draft' })
+      setImageFile(null)
       setShowForm(false)
     }
+    setUploading(false)
   }
 
   const deletePost = async (id: number) => {

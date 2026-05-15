@@ -8,6 +8,7 @@ type Project = {
   client: string
   category: string
   description: string
+  thumbnail_url: string
 }
 
 const filters = ['All', 'Logo & Brand', 'Brand Identity', 'Social Media', 'AI Training']
@@ -94,10 +95,18 @@ export default function Portfolio() {
             {filtered.map(project => (
               <div key={project.id}
                 className="group relative border-2 border-gray-800 hover:border-white transition-all duration-300 cursor-pointer overflow-hidden">
-                <div className="h-52 flex items-center justify-center relative"
+                <div className="h-52 flex items-center justify-center relative overflow-hidden"
                   style={{ backgroundColor: (colors[project.category] || '#E63329') + '20' }}>
-                  <div className="w-16 h-16 border-4 transition-transform duration-300 group-hover:rotate-45"
-                    style={{ borderColor: colors[project.category] || '#E63329' }} />
+                  {(project as any).image_url ? (
+                    <img
+                      src={(project as any).image_url}
+                      alt={project.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 border-4 transition-transform duration-300 group-hover:rotate-45"
+                      style={{ borderColor: colors[project.category] || '#E63329' }} />
+                  )}
                   <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-80 transition-opacity duration-300 flex items-center justify-center">
                     <span className="text-white font-bold uppercase text-sm tracking-widest"
                       style={{ fontFamily: 'Josefin Sans, sans-serif' }}>View Project</span>
